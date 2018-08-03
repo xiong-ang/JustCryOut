@@ -12,6 +12,13 @@ namespace CYServer.Models
     public class Media
     {
         public readonly string MediaPath = ConfigManager.Instance.GetWebConfigValueByKey("DataPath");
+        private AccessManager AM
+        {
+            get
+            {
+                return AccessManager.Instance;
+            }
+        }
 
         #region signalton
         private static Media _instance;
@@ -29,6 +36,7 @@ namespace CYServer.Models
         }
         private Media()
         {
+            AM.Login();
         }
         #endregion signalton
 
@@ -55,27 +63,14 @@ namespace CYServer.Models
         #region wordToVedio
         private string WordToVedio(string message)
         {
-            //访问https://openapi.baidu.com/oauth/2.0/token 换取 token
-            var uri = new UriBuilder(@"https://openapi.baidu.com/oauth/2.0/token");
-            uri.Query = new UriParamsComposer
-            {
-                {"grant_type","client_credentials"},
-                {"client_id","PIX9PCkB41qRmmopUcFi2CrY"},
-                {"client_secret","rDSRUf2GCHh5H9oMHdmH1cYgNV4WYPYL"}
-            }
-            .ToString();
-            string answer;
-            AjaxHelper.GetCall(uri.ToString(), string.Empty, out answer);
-            Token tk = JsonHelper.FormJson<Token>(answer);
-
             //访问接口，下载MP3文件
-            uri = new UriBuilder(@"http://tsn.baidu.com/text2audio");
+            var uri = new UriBuilder(@"http://tsn.baidu.com/text2audio");
             uri.Query = new UriParamsComposer
             {
                 {"lan","zh"},
                 {"ctp","1"},
                 {"cuid","abcdxxx"},
-                {"tok",tk.access_token},
+                {"tok",AM.AMToken.access_token},
                 {"tex",message},
                 {"vol","9"},
                 {"per","5"},
@@ -90,13 +85,6 @@ namespace CYServer.Models
             helper.FileName = fileName;
             helper.Download(uri.ToString(), MediaPath);
 
-            //Return until download complete
-            /*
-            while (!File.Exists(Path.Combine(MediaPath, fileName)))
-            {
-                Thread.Sleep(100);
-            }
-            */
             return fileName;
         }
         #endregion wordToVedio

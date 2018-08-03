@@ -6,12 +6,12 @@ using System.Web;
 
 namespace CYServer.Models
 {
-    internal class Token
+    public class Token
     {
         [JsonProperty] 
         public string access_token;
         [JsonProperty] 
-        public int expires_in;
+        public long expires_in;
         [JsonProperty]
         public string refresh_token;
         [JsonProperty]
@@ -21,18 +21,49 @@ namespace CYServer.Models
         [JsonProperty]
         public string session_secret;
 
-        /*
-        internal bool TokenValid
+        [JsonIgnore]
+        private DateTime tokenAcquiredTime;
+
+        [JsonIgnore]
+        public bool TokenValid
         {
             get
             {
-                if (string.IsNullOrWhiteSpace(access_token)
-                    || string.IsNullOrWhiteSpace(refresh_token)) 
-                    return false;
-                var expire = DataTimeOffset.FromUnixTimeSeconds()
+                return (!string.IsNullOrWhiteSpace(access_token)
+                    && !string.IsNullOrWhiteSpace(refresh_token)
+                    && DateTime.Now < tokenAcquiredTime.AddSeconds(expires_in - 5 * 60));
             }
         }
-        */
 
+        [JsonIgnore]
+        public bool RefreshTokenValid
+        {
+            get
+            {
+                //Need to get the info
+                return false;
+            }
+        }
+
+        public static Token NewToken(string json, Token oldToken = null)
+        {
+            Token token = null;
+            try
+            {
+                token = JsonHelper.FormJson<Token>(json);
+                token.tokenAcquiredTime = DateTime.Now;
+
+                //If get token from refresh token
+                if (string.IsNullOrEmpty(token.refresh_token) && oldToken != null && !string.IsNullOrWhiteSpace(oldToken.refresh_token))
+                {
+                    token.refresh_token = oldToken.refresh_token;
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return token;
+        }
     }
 }

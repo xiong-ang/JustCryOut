@@ -11,16 +11,20 @@
 * .Net发送Ajax请求            
 * 前端使用绝对地址          
 * 下载文件路径配置，各种配置器
+* Acess管理         
+* Token管理 refactor 
+* jwt token总结
+    + https://www.jianshu.com/p/576dbf44b2ae           
+    + https://jwt.io/           
+* 
 
 ## 待实现Feature                           
-* 前端专业化定制           
-* 后端进行功能模块的抽象和提炼                
-* Acess管理         
-* Token管理 refactor jwt token总结                            
+* 前端专业化定制                          
 * 考虑并发          
 
 ## Defect               
 * 抽象功能模块需要进行提取                      
+    + 让解耦的代码比直接的代码容易看懂，更明白
 
 ## 要点        
 * 配置Media目录            
